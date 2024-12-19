@@ -1,26 +1,66 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>음식 분류기</title>
     <link rel="stylesheet" href="styles.css">
-<script src="script.js"></script>
-
 </head>
 <body>
+
+    <header>
+        <h1 id="main-title">
+            <span class="highlight">🍕🍔🍜 음식</span> 분류기 🍕🍔🍜
+        </h1>
+    </header>
+
     <div class="container">
-        <h1>🍕🍔🍜 음식 분류기</h1>
-        <p>이미지를 업로드하거나 드래그하여 음식을 분류하세요!</p>
-        <div id="drop-zone" class="drop-zone">
-            <input type="file" id="upload" hidden />
-            <button onclick="document.getElementById('upload').click()">이미지 선택</button>
-            <p>또는 이미지를 여기로 드래그하세요</p>
+        <p>이미지를 업로드하면 분류 결과가 표시됩니다.</p>
+        <input type="file" id="imageInput" accept="image/*">
+        <div id="preview">
+            <img src="1.png" id="uploadedImage" alt="Uploaded Image">
         </div>
-        <div id="result" class="result"></div>
+        
+        <div id="label-container"><div></div><div></div></div>
+        <div id="graph-container"></div> <!-- 그래프 컨테이너 -->
+        <div id="result-container"></div> <!-- 결과 컨테이너 -->
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
-    <script src="script.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
+    <script>
+        const MODEL_URL = "https://teachablemachine.withgoogle.com/models/JQ4pY19qz/model.json"; 
+        let model;
+
+        // Teachable Machine 모델 로드
+        async function loadModel() {
+            model = await tmImage.load(MODEL_URL);
+            console.log("모델 로드 완료!");
+        }
+
+        // 이미지 입력 이벤트
+        document.getElementById("imageInput").addEventListener("change", async (event) => {
+            const file = event.target.files[0];
+            const uploadedImage = document.getElementById("uploadedImage");
+
+            if (file) {
+                uploadedImage.src = URL.createObjectURL(file);
+                uploadedImage.onload = async () => {
+                    const predictions = await model.predict(uploadedImage, false);
+                    const bestPrediction = predictions.sort((a, b) => b.probability - a.probability)[0];
+
+                    // 분류 결과 표시
+                    const resultContainer = document.getElementById("result-container");
+                    resultContainer.innerHTML = `
+                        <h2>분류 결과:</h2>
+                        <p>${bestPrediction.className} - ${(bestPrediction.probability * 100).toFixed(2)}%</p>`;
+                };
+            }
+        });
+
+        // 모델 초기화 호출
+        loadModel();
+    </script>
+
 </body>
 </html>
-
