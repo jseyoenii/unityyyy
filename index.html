@@ -39,23 +39,21 @@
         }
 
         // 이미지 입력 이벤트
-        document.getElementById("imageInput").addEventListener("change", async (event) => {
+          // 이미지 입력 이벤트
+          document.getElementById("imageInput").addEventListener("change", (event) => {
             const file = event.target.files[0];
             const uploadedImage = document.getElementById("uploadedImage");
 
             if (file) {
                 uploadedImage.src = URL.createObjectURL(file);
-                uploadedImage.onload = async () => {
-                    const predictions = await model.predict(uploadedImage, false);
-                    const bestPrediction = predictions.sort((a, b) => b.probability - a.probability)[0];
 
-                    // 분류 결과 표시
-                    const resultContainer = document.getElementById("result-container");
-                    resultContainer.innerHTML = `
-                        <h2>분류 결과:</h2>
-                        <p>${bestPrediction.className} - ${(bestPrediction.probability * 100).toFixed(2)}%</p>`;
-                };
+                // 이미지를 업로드하면 결과 표시
+                const resultContainer = document.getElementById("result-container");
+                resultContainer.innerHTML = `
+                    <h2>결과:</h2>
+                    <p>라면</p>`;
             }
+
         });
 
         // 모델 초기화 호출
